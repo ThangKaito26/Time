@@ -80,13 +80,23 @@
     <!-- Main App Container -->
     <div id="appContainer" class="container mx-auto p-4 md:p-6 max-w-6xl hidden">
         
-        <header class="flex flex-wrap justify-between items-start mb-6 md:mb-8 gap-4">
+        <header class="flex flex-col md:flex-row justify-between items-start mb-6 md:mb-8 gap-4">
             <div>
-                <h1 class="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-sky-500 to-indigo-600">Nhật Ký Học Tập Hàng Ngày</h1>
+                <h1 class="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-sky-500 to-indigo-600">Nhật Ký Học Tập</h1>
                 <p class="text-slate-500 mt-2">Đặt mục tiêu và theo dõi tiến độ học tập của bạn.</p>
             </div>
-            <div class="flex items-center gap-4">
-                 <div id="soundControls" class="flex items-center gap-2 mr-4">
+            <div class="w-full md:w-auto flex flex-col md:items-end gap-4">
+                 <div class="flex items-center justify-end gap-3">
+                     <div id="userInfo" class="text-right">
+                        <p id="userName" class="font-semibold text-slate-700 truncate"></p>
+                        <p id="userEmail" class="text-xs text-slate-500 truncate"></p>
+                     </div>
+                     <img id="userAvatar" class="w-12 h-12 rounded-full shadow-md border-2 border-white flex-shrink-0" src="" alt="User Avatar">
+                     <button id="logoutBtn" title="Đăng xuất" class="p-3 rounded-full bg-white shadow-sm hover:bg-red-100 transition text-slate-600 hover:text-red-600 flex-shrink-0">
+                        <i data-lucide="log-out" class="w-5 h-5"></i>
+                    </button>
+                </div>
+                <div id="soundControls" class="flex items-center gap-2 self-start md:self-end">
                     <button id="muteBtn" class="p-3 rounded-full bg-white shadow-sm hover:bg-slate-200 transition text-slate-600">
                         <i data-lucide="volume-2" class="w-5 h-5"></i>
                     </button>
@@ -98,25 +108,21 @@
                         <option value="lofi">Nhạc Lofi</option>
                     </select>
                 </div>
-                 <div id="userInfo" class="text-right">
-                    <p id="userName" class="font-semibold text-slate-700"></p>
-                    <p id="userEmail" class="text-xs text-slate-500"></p>
-                 </div>
-                 <img id="userAvatar" class="w-12 h-12 rounded-full shadow-md border-2 border-white" src="" alt="User Avatar">
-                 <button id="logoutBtn" title="Đăng xuất" class="p-3 rounded-full bg-white shadow-sm hover:bg-red-100 transition text-slate-600 hover:text-red-600">
-                    <i data-lucide="log-out" class="w-5 h-5"></i>
-                </button>
             </div>
         </header>
 
-        <div class="flex flex-col md:flex-row justify-center items-center gap-4 mb-6">
-            <button id="addSubjectBtn" class="w-full md:w-auto flex items-center justify-center gap-2 bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:bg-indigo-700 transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50">
+        <div class="flex flex-col sm:flex-row justify-center items-center gap-3 mb-6">
+            <button id="addSubjectBtn" class="w-full sm:w-auto flex-grow sm:flex-grow-0 flex items-center justify-center gap-2 bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:bg-indigo-700 transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50">
                 <i data-lucide="plus-circle" class="w-5 h-5"></i>
-                Thêm Chủ Đề Mới
+                Thêm Chủ Đề
             </button>
-             <button id="startPomodoroBtn" class="w-full md:w-auto flex items-center justify-center gap-2 bg-emerald-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:bg-emerald-700 transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-opacity-50">
+             <button id="startPomodoroBtn" class="w-full sm:w-auto flex-grow sm:flex-grow-0 flex items-center justify-center gap-2 bg-emerald-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:bg-emerald-700 transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-opacity-50">
                 <i data-lucide="timer" class="w-5 h-5"></i>
-                Bắt đầu Pomodoro (25 phút)
+                Pomodoro (25 phút)
+            </button>
+            <button id="manualResetBtn" class="w-full sm:w-auto flex-grow sm:flex-grow-0 flex items-center justify-center gap-2 bg-amber-500 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:bg-amber-600 transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-opacity-50">
+                <i data-lucide="refresh-cw" class="w-5 h-5"></i>
+                Reset Ngày Mới
             </button>
         </div>
 
@@ -125,7 +131,7 @@
         <div id="emptyState" class="text-center py-20 px-6 bg-white rounded-lg shadow-sm hidden border border-slate-200">
              <i data-lucide="folder-open" class="w-16 h-16 mx-auto text-slate-300"></i>
             <h3 class="mt-4 text-lg font-medium text-slate-700">Chưa có chủ đề nào</h3>
-            <p class="mt-1 text-sm text-slate-500">Nhấn "Thêm Chủ Đề Mới" để bắt đầu.</p>
+            <p class="mt-1 text-sm text-slate-500">Nhấn "Thêm Chủ Đề" để bắt đầu.</p>
         </div>
     </div>
     
@@ -245,7 +251,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, doc, onSnapshot, deleteDoc, updateDoc, query, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, doc, onSnapshot, deleteDoc, updateDoc, query, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // Firebase configuration
         const firebaseConfig = {
@@ -263,6 +269,7 @@
         let app, auth, db, userId;
         let subjectsCollectionRef;
         let unsubscribeSubjects, unsubscribeTasks;
+        let midnightCheckInterval = null;
         let localSubjectsCache = [];
         let localTasksCache = {}; // Store tasks per subject: { [subjectId]: [tasks] }
         
@@ -287,6 +294,7 @@
             subjectList: document.getElementById('subjectList'),
             addSubjectBtn: document.getElementById('addSubjectBtn'),
             startPomodoroBtn: document.getElementById('startPomodoroBtn'),
+            manualResetBtn: document.getElementById('manualResetBtn'), // New button
             subjectModal: document.getElementById('subjectModal'),
             modalContent: document.getElementById('modalContent'),
             modalTitle: document.getElementById('modalTitle'),
@@ -405,44 +413,71 @@
 
         // --- Daily Reset Logic ---
         async function resetAllProgress() {
-            console.log("Performing daily reset...");
-            const updates = localSubjectsCache.map(subject => 
-                updateDoc(doc(db, subjectsCollectionRef.path, subject.id), {
-                    dailyRemainingSeconds: subject.dailyGoalSeconds
-                })
-            );
+            console.log("Performing daily reset for all subjects and tasks...");
+            const batch = writeBatch(db);
 
-            const allTaskResetPromises = [];
-            for (const subject of localSubjectsCache) {
+            // Reset subjects
+            localSubjectsCache.forEach(subject => {
+                const subjectRef = doc(db, subjectsCollectionRef.path, subject.id);
+                batch.update(subjectRef, {
+                    dailyRemainingSeconds: subject.dailyGoalSeconds
+                });
+            });
+
+            // Reset tasks for all subjects
+            const allTaskResetPromises = localSubjectsCache.map(async (subject) => {
                 const tasksPath = `${subjectsCollectionRef.path}/${subject.id}/tasks`;
                 const tasksSnapshot = await getDocs(collection(db, tasksPath));
-                tasksSnapshot.docs.forEach(taskDoc => {
+                tasksSnapshot.forEach(taskDoc => {
                     const taskData = taskDoc.data();
                     const taskDuration = Number(taskData.durationSeconds) || 0;
+                    // Only reset if it's not already at full duration
                     if (taskData.remainingDurationSeconds !== taskDuration) {
-                        allTaskResetPromises.push(updateDoc(doc(db, tasksPath, taskDoc.id), {
+                         const taskRef = doc(db, tasksPath, taskDoc.id);
+                         batch.update(taskRef, {
                             remainingDurationSeconds: taskDuration
-                        }));
+                        });
                     }
                 });
-            }
+            });
 
             try {
-                await Promise.all([...updates, ...allTaskResetPromises]);
-                showToast("Tiến độ học tập đã được tự động reset cho ngày mới!");
-                localStorage.setItem('lastResetDate', new Date().toISOString().split('T')[0]);
+                // Wait for all task reads to complete before committing the batch
+                await Promise.all(allTaskResetPromises);
+                await batch.commit();
+                
+                localStorage.setItem(`lastResetDate_${userId}`, new Date().toISOString().split('T')[0]);
+                console.log("Daily reset completed successfully.");
             } catch (error) {
                 console.error("Error during daily reset:", error);
                 showToast("Lỗi khi reset tiến độ hàng ngày.");
             }
         }
 
-        function checkAndPerformDailyReset() {
-            const lastResetDate = localStorage.getItem('lastResetDate');
+        function checkAndPerformInitialReset() {
+            const lastResetDate = localStorage.getItem(`lastResetDate_${userId}`);
             const todayDate = new Date().toISOString().split('T')[0];
             if (lastResetDate !== todayDate) {
-                resetAllProgress();
+                console.log("Initial check: Date has changed. Resetting progress.");
+                resetAllProgress().then(() => {
+                    showToast("Tiến độ học tập đã được tự động reset cho ngày mới!");
+                });
             }
+        }
+
+        function scheduleMidnightResetCheck() {
+            if (midnightCheckInterval) clearInterval(midnightCheckInterval);
+            
+            midnightCheckInterval = setInterval(() => {
+                const lastResetDate = localStorage.getItem(`lastResetDate_${userId}`);
+                const todayDate = new Date().toISOString().split('T')[0];
+                if (lastResetDate !== todayDate) {
+                    console.log("Midnight check: Date has changed. Resetting progress.");
+                    resetAllProgress().then(() => {
+                       showToast("Đã tự động reset tiến độ cho ngày mới!");
+                    });
+                }
+            }, 60 * 1000); // Check every minute
         }
 
         // --- Subject Management ---
@@ -1148,6 +1183,18 @@
                     durationSeconds: 25 * 60,
                 });
             });
+            ui.manualResetBtn.addEventListener('click', () => {
+                showCustomConfirm({
+                    title: 'Reset Tiến Độ?',
+                    message: 'Bạn có chắc chắn muốn reset lại toàn bộ tiến độ học tập cho ngày hôm nay không?',
+                    okText: 'Reset',
+                    onOk: () => {
+                        resetAllProgress().then(() => {
+                           showToast("Đã reset lại tiến độ ngày mới.");
+                        });
+                    }
+                });
+            });
             ui.cancelSubjectBtn.addEventListener('click', closeSubjectModal);
             ui.subjectModal.addEventListener('click', e => e.target === ui.subjectModal && closeSubjectModal());
             ui.subjectForm.addEventListener('submit', saveSubject);
@@ -1224,18 +1271,24 @@
                     
                     unsubscribeSubjects = onSnapshot(query(subjectsCollectionRef), (snapshot) => {
                         localSubjectsCache = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                        checkAndPerformDailyReset();
+                        checkAndPerformInitialReset();
                         renderSubjects();
                     }, (error) => {
                         console.error("Firestore snapshot error:", error);
                         ui.loadingState.innerText = "Lỗi khi tải dữ liệu.";
                     });
+                    
+                    // Start checking for midnight
+                    scheduleMidnightResetCheck();
 
                 } else {
                     ui.appContainer.classList.add('hidden');
                     ui.loginContainer.classList.remove('hidden');
+                    userId = null;
                     if (unsubscribeSubjects) unsubscribeSubjects();
                     if (unsubscribeTasks) unsubscribeTasks();
+                    if (midnightCheckInterval) clearInterval(midnightCheckInterval);
+                    
                     localSubjectsCache = [];
                     localTasksCache = {};
                     ui.subjectList.innerHTML = '';
