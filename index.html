@@ -1,0 +1,1254 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nhật Ký Học Tập Hàng Ngày</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* bg-slate-50 */
+            -webkit-tap-highlight-color: transparent;
+        }
+        .modal-backdrop, .confirm-backdrop, .task-modal-backdrop, .focus-backdrop {
+            transition: opacity 0.3s ease-in-out;
+        }
+        .modal-content, .confirm-content, .task-modal-content, .focus-content {
+            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+        }
+        .toast {
+            animation: slide-in 0.5s forwards, slide-out 0.5s 4.5s forwards;
+        }
+        .progress-bar-inner {
+            transition: width 0.5s ease-in-out;
+        }
+        @keyframes slide-in {
+            from { transform: translateY(100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes slide-out {
+            from { transform: translateY(0); opacity: 1; }
+            to { transform: translateY(100%); opacity: 0; }
+        }
+        .subject-card {
+             transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .subject-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px -5px rgba(71, 85, 105, 0.1), 0 4px 6px -2px rgba(71, 85, 105, 0.05);
+        }
+        .task-list-container::-webkit-scrollbar { width: 8px; }
+        .task-list-container::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+        .task-list-container::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .task-list-container::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Focus Mode Styles */
+        .focus-content {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .focus-backdrop {
+            animation: fadeIn 0.5s ease;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Login Screen -->
+    <div id="loginContainer" class="flex items-center justify-center h-screen bg-slate-100">
+        <div class="text-center p-8 bg-white rounded-xl shadow-2xl max-w-sm mx-auto border border-slate-200">
+            <h1 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-sky-500 to-indigo-600 mb-2">Nhật Ký Học Tập</h1>
+            <p class="text-slate-500 mb-8">Đăng nhập để đặt mục tiêu và theo dõi tiến độ học tập hàng ngày.</p>
+            <button id="loginBtn" class="w-full flex items-center justify-center gap-3 bg-white border border-slate-300 text-slate-700 font-semibold py-3 px-6 rounded-lg shadow-sm hover:bg-slate-50 transition-all transform hover:scale-105">
+                <svg class="w-6 h-6" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path><path fill="none" d="M0 0h48v48H0z"></path></svg>
+                Đăng nhập với Google
+            </button>
+        </div>
+    </div>
+
+    <!-- Main App Container -->
+    <div id="appContainer" class="container mx-auto p-4 md:p-6 max-w-6xl hidden">
+        
+        <header class="flex flex-wrap justify-between items-start mb-6 md:mb-8 gap-4">
+            <div>
+                <h1 class="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-sky-500 to-indigo-600">Nhật Ký Học Tập Hàng Ngày</h1>
+                <p class="text-slate-500 mt-2">Đặt mục tiêu và theo dõi tiến độ học tập của bạn.</p>
+            </div>
+            <div class="flex items-center gap-4">
+                 <div id="soundControls" class="flex items-center gap-2 mr-4">
+                    <button id="muteBtn" class="p-3 rounded-full bg-white shadow-sm hover:bg-slate-200 transition text-slate-600">
+                        <i data-lucide="volume-2" class="w-5 h-5"></i>
+                    </button>
+                    <select id="soundSelect" class="bg-white border border-slate-300 rounded-lg py-2 px-3 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <option value="">Không có</option>
+                        <option value="tick-tock">Tích tắc</option>
+                        <option value="rain">Mưa rơi</option>
+                        <option value="waves">Sóng biển</option>
+                        <option value="lofi">Nhạc Lofi</option>
+                    </select>
+                </div>
+                 <div id="userInfo" class="text-right">
+                    <p id="userName" class="font-semibold text-slate-700"></p>
+                    <p id="userEmail" class="text-xs text-slate-500"></p>
+                 </div>
+                 <img id="userAvatar" class="w-12 h-12 rounded-full shadow-md border-2 border-white" src="" alt="User Avatar">
+                 <button id="logoutBtn" title="Đăng xuất" class="p-3 rounded-full bg-white shadow-sm hover:bg-red-100 transition text-slate-600 hover:text-red-600">
+                    <i data-lucide="log-out" class="w-5 h-5"></i>
+                </button>
+            </div>
+        </header>
+
+        <div class="flex flex-col md:flex-row justify-center items-center gap-4 mb-6">
+            <button id="addSubjectBtn" class="w-full md:w-auto flex items-center justify-center gap-2 bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:bg-indigo-700 transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50">
+                <i data-lucide="plus-circle" class="w-5 h-5"></i>
+                Thêm Chủ Đề Mới
+            </button>
+             <button id="startPomodoroBtn" class="w-full md:w-auto flex items-center justify-center gap-2 bg-emerald-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:bg-emerald-700 transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-opacity-50">
+                <i data-lucide="timer" class="w-5 h-5"></i>
+                Bắt đầu Pomodoro (25 phút)
+            </button>
+        </div>
+
+        <div id="subjectList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6"></div>
+        <div id="loadingState" class="text-center py-10 text-slate-500"><p>Đang tải danh sách chủ đề...</p></div>
+        <div id="emptyState" class="text-center py-20 px-6 bg-white rounded-lg shadow-sm hidden border border-slate-200">
+             <i data-lucide="folder-open" class="w-16 h-16 mx-auto text-slate-300"></i>
+            <h3 class="mt-4 text-lg font-medium text-slate-700">Chưa có chủ đề nào</h3>
+            <p class="mt-1 text-sm text-slate-500">Nhấn "Thêm Chủ Đề Mới" để bắt đầu.</p>
+        </div>
+    </div>
+    
+    <!-- Focus Mode Overlay -->
+    <div id="focusOverlay" class="focus-backdrop fixed inset-0 bg-slate-900 bg-opacity-90 flex-col items-center justify-center p-4 hidden z-[100]">
+        <button id="closeFocusBtn" class="absolute top-6 right-6 text-white text-opacity-70 hover:text-opacity-100 transition">
+            <i data-lucide="x" class="w-10 h-10"></i>
+        </button>
+        <div class="focus-content text-white text-center rounded-2xl p-8 w-full max-w-4xl">
+            <p id="focusTaskName" class="text-2xl md:text-3xl font-medium mb-4 opacity-80">Bắt đầu phiên tập trung...</p>
+            <div id="focusTimerDisplay" class="text-7xl md:text-9xl font-bold tracking-tighter my-8">00:00</div>
+            <div class="flex items-center justify-center gap-4">
+                <button id="focusPauseResumeBtn" class="text-xl font-semibold bg-white bg-opacity-20 hover:bg-opacity-30 transition-all text-white rounded-full w-32 h-32 flex items-center justify-center">
+                    <i data-lucide="pause" class="w-12 h-12"></i>
+                </button>
+                <button id="focusCompleteBtn" class="text-xl font-semibold bg-white bg-opacity-20 hover:bg-opacity-30 transition-all text-white rounded-full w-32 h-32 flex items-center justify-center" title="Hoàn thành sớm / Bỏ qua">
+                    <i data-lucide="skip-forward" class="w-12 h-12"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Add/Edit Subject Modal -->
+    <div id="subjectModal" class="modal-backdrop fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 hidden opacity-0 z-50">
+        <div id="modalContent" class="modal-content bg-white rounded-lg shadow-2xl w-full max-w-md p-6 md:p-8 transform scale-95 opacity-0">
+            <h2 id="modalTitle" class="text-2xl font-bold mb-6 text-slate-800">Thêm Chủ Đề Mới</h2>
+            <form id="subjectForm">
+                <input type="hidden" id="subjectId">
+                <div class="mb-4">
+                    <label for="subjectName" class="block text-sm font-medium text-slate-700 mb-1">Tên chủ đề</label>
+                    <input type="text" id="subjectName" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Ví dụ: Tiếng Anh" required>
+                </div>
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Mục tiêu thời gian học mỗi ngày</label>
+                    <div class="flex gap-2">
+                        <input type="number" id="dailyGoalHours" class="w-1/2 px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Giờ" min="0" required>
+                        <input type="number" id="dailyGoalMinutes" class="w-1/2 px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Phút" min="0" max="59" required>
+                    </div>
+                </div>
+                <div class="flex justify-end gap-4">
+                    <button type="button" id="cancelSubjectBtn" class="px-6 py-2 bg-slate-200 text-slate-800 rounded-lg hover:bg-slate-300 transition">Hủy</button>
+                    <button type="submit" class="px-6 py-2 bg-indigo-600 text-white font-bold rounded-lg hover:bg-indigo-700 transition">Lưu</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Task Management Modal -->
+    <div id="taskModal" class="task-modal-backdrop fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 hidden opacity-0 z-[55]">
+        <div id="taskModalContent" class="task-modal-content bg-white rounded-lg shadow-2xl w-full max-w-2xl transform scale-95 opacity-0 flex flex-col" style="height: 90vh; max-height: 700px;">
+            <div class="p-6 border-b border-slate-200">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h2 id="taskModalTitle" class="text-2xl font-bold text-slate-800">Quản lý Nhiệm vụ</h2>
+                        <p id="taskModalSubjectName" class="text-slate-500"></p>
+                    </div>
+                    <button id="closeTaskModalBtn" class="p-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 transition-colors">
+                        <i data-lucide="x" class="w-6 h-6"></i>
+                    </button>
+                </div>
+            </div>
+            <div id="taskListContainer" class="flex-grow p-6 overflow-y-auto task-list-container">
+                <div id="taskEmptyState" class="text-center py-10 text-slate-500 hidden">
+                    <i data-lucide="clipboard-list" class="w-12 h-12 mx-auto text-slate-300"></i>
+                    <h3 class="mt-4 text-md font-medium text-slate-600">Chưa có nhiệm vụ nào</h3>
+                    <p class="mt-1 text-sm text-slate-400">Thêm nhiệm vụ mới ở bên dưới.</p>
+                </div>
+            </div>
+            <div class="p-6 border-t border-slate-200 bg-slate-50">
+                <form id="taskForm" class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                    <input type="hidden" id="currentSubjectId">
+                    <input type="hidden" id="taskId">
+                    <div class="w-full sm:flex-grow">
+                        <label for="taskName" class="sr-only">Tên nhiệm vụ</label>
+                        <input type="text" id="taskName" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Tên nhiệm vụ (ví dụ: Luyện nghe)" required>
+                    </div>
+                    <div class="w-full sm:w-auto flex items-center gap-2">
+                         <label for="taskDuration" class="sr-only">Thời gian (phút)</label>
+                         <input type="number" id="taskDuration" class="w-full sm:w-28 px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Phút" min="1" required>
+                    </div>
+                    <button type="submit" id="saveTaskBtn" class="w-full sm:w-auto flex-shrink-0 px-5 py-2.5 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition shadow">
+                        <span id="saveTaskBtnText">Thêm Nhiệm vụ</span>
+                    </button>
+                    <button type="button" id="cancelEditTaskBtn" class="w-full sm:w-auto flex-shrink-0 px-5 py-2.5 bg-slate-200 text-slate-800 rounded-lg hover:bg-slate-300 transition hidden">Hủy</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Confirm Modal -->
+    <div id="confirmModal" class="confirm-backdrop fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 hidden opacity-0 z-[60]">
+        <div id="confirmContent" class="confirm-content bg-white rounded-lg shadow-2xl w-full max-w-sm p-6 transform scale-95 opacity-0">
+            <h3 id="confirmTitle" class="text-lg font-bold text-slate-900">Xác nhận hành động</h3>
+            <p id="confirmMessage" class="text-sm text-slate-600 mt-2 mb-6">Bạn có chắc chắn muốn tiếp tục?</p>
+            <div class="flex justify-end gap-3">
+                <button id="confirmCancelBtn" class="px-5 py-2 bg-slate-200 text-slate-800 rounded-md hover:bg-slate-300 transition">Hủy</button>
+                <button id="confirmOkBtn" class="px-5 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition">Xóa</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast fixed bottom-5 right-5 bg-slate-900 text-white py-3 px-5 rounded-lg shadow-xl hidden z-[110]">
+        <p id="toastMessage"></p>
+    </div>
+    
+    <!-- Audio Elements -->
+    <audio id="audio-tick-tock" src="https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg"></audio>
+    <audio id="audio-rain" loop src="https://actions.google.com/sounds/v1/weather/rain_heavy_with_thunder.ogg"></audio>
+    <audio id="audio-waves" loop src="https://actions.google.com/sounds/v1/nature/ocean_wave_surf.ogg"></audio>
+    <audio id="audio-lofi" loop src="https://storage.googleapis.com/gemini-prompt-gallery-assets/creative_writing_with_sound_generation_6ce6a271.mp3"></audio>
+
+
+    <!-- Firebase -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, doc, onSnapshot, deleteDoc, updateDoc, query, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDiXkXsVuE_oFvCRjjx5HF-IRyvE0owEQE",
+            authDomain: "laplaingatquang.firebaseapp.com",
+            projectId: "laplaingatquang",
+            storageBucket: "laplaingatquang.appspot.com",
+            messagingSenderId: "824449193335",
+            appId: "1:824449193335:web:80d2023aaa75dbb530fd72"
+        };
+
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'daily-study-log';
+        const DEFAULT_TITLE = 'Nhật Ký Học Tập Hàng Ngày';
+        
+        let app, auth, db, userId;
+        let subjectsCollectionRef;
+        let unsubscribeSubjects, unsubscribeTasks;
+        let localSubjectsCache = [];
+        let localTasksCache = {}; // Store tasks per subject: { [subjectId]: [tasks] }
+        
+        // Timer states
+        let currentFocusSession = null; // For Focus Mode (Pomodoro, Subject)
+        let currentActiveTimer = null; // For individual tasks from the modal
+
+        let isMuted = true;
+        let currentAmbientSound = null;
+
+        // UI elements
+        const ui = {
+            loginContainer: document.getElementById('loginContainer'),
+            appContainer: document.getElementById('appContainer'),
+            loginBtn: document.getElementById('loginBtn'),
+            logoutBtn: document.getElementById('logoutBtn'),
+            userInfo: {
+                name: document.getElementById('userName'),
+                email: document.getElementById('userEmail'),
+                avatar: document.getElementById('userAvatar'),
+            },
+            subjectList: document.getElementById('subjectList'),
+            addSubjectBtn: document.getElementById('addSubjectBtn'),
+            startPomodoroBtn: document.getElementById('startPomodoroBtn'),
+            subjectModal: document.getElementById('subjectModal'),
+            modalContent: document.getElementById('modalContent'),
+            modalTitle: document.getElementById('modalTitle'),
+            subjectForm: document.getElementById('subjectForm'),
+            cancelSubjectBtn: document.getElementById('cancelSubjectBtn'),
+            subjectIdInput: document.getElementById('subjectId'),
+            subjectNameInput: document.getElementById('subjectName'),
+            dailyGoalHoursInput: document.getElementById('dailyGoalHours'),
+            dailyGoalMinutesInput: document.getElementById('dailyGoalMinutes'),
+            toast: document.getElementById('toast'),
+            toastMessage: document.getElementById('toastMessage'),
+            loadingState: document.getElementById('loadingState'),
+            emptyState: document.getElementById('emptyState'),
+            
+            taskModal: {
+                backdrop: document.getElementById('taskModal'),
+                content: document.getElementById('taskModalContent'),
+                title: document.getElementById('taskModalTitle'),
+                subjectName: document.getElementById('taskModalSubjectName'),
+                closeBtn: document.getElementById('closeTaskModalBtn'),
+                listContainer: document.getElementById('taskListContainer'),
+                emptyState: document.getElementById('taskEmptyState'),
+                form: document.getElementById('taskForm'),
+                currentSubjectIdInput: document.getElementById('currentSubjectId'),
+                taskIdInput: document.getElementById('taskId'),
+                taskNameInput: document.getElementById('taskName'),
+                taskDurationInput: document.getElementById('taskDuration'),
+                saveBtn: document.getElementById('saveTaskBtn'),
+                saveBtnText: document.getElementById('saveTaskBtnText'),
+                cancelEditBtn: document.getElementById('cancelEditTaskBtn'),
+            },
+
+            confirmModal: {
+                backdrop: document.getElementById('confirmModal'),
+                content: document.getElementById('confirmContent'),
+                title: document.getElementById('confirmTitle'),
+                message: document.getElementById('confirmMessage'),
+                okBtn: document.getElementById('confirmOkBtn'),
+                cancelBtn: document.getElementById('confirmCancelBtn'),
+            },
+
+            focusMode: {
+                overlay: document.getElementById('focusOverlay'),
+                closeBtn: document.getElementById('closeFocusBtn'),
+                taskName: document.getElementById('focusTaskName'),
+                timerDisplay: document.getElementById('focusTimerDisplay'),
+                pauseResumeBtn: document.getElementById('focusPauseResumeBtn'),
+                pauseResumeIcon: document.querySelector('#focusPauseResumeBtn i'),
+                completeBtn: document.getElementById('focusCompleteBtn'),
+            },
+            
+            sound: {
+                muteBtn: document.getElementById('muteBtn'),
+                muteIcon: document.querySelector('#muteBtn i'),
+                soundSelect: document.getElementById('soundSelect'),
+                tickTock: document.getElementById('audio-tick-tock'),
+                rain: document.getElementById('audio-rain'),
+                waves: document.getElementById('audio-waves'),
+                lofi: document.getElementById('audio-lofi'),
+            }
+        };
+
+        // --- Utility functions ---
+        function showToast(message) {
+            ui.toastMessage.textContent = message;
+            ui.toast.classList.remove('hidden');
+            setTimeout(() => ui.toast.classList.add('hidden'), 5000);
+        }
+        
+        function showCustomConfirm({ title, message, okText = 'OK', onOk }) {
+            ui.confirmModal.title.textContent = title;
+            ui.confirmModal.message.textContent = message;
+            ui.confirmModal.okBtn.textContent = okText;
+            ui.confirmModal.backdrop.classList.remove('hidden');
+            setTimeout(() => {
+                ui.confirmModal.backdrop.classList.remove('opacity-0');
+                ui.confirmModal.content.classList.remove('scale-95', 'opacity-0');
+            }, 10);
+            const hide = () => {
+                ui.confirmModal.backdrop.classList.add('opacity-0');
+                ui.confirmModal.content.classList.add('scale-95', 'opacity-0');
+                setTimeout(() => ui.confirmModal.backdrop.classList.add('hidden'), 300);
+            };
+            const okListener = () => { onOk(); hide(); };
+            const cancelListener = () => hide();
+            ui.confirmModal.okBtn.addEventListener('click', okListener, { once: true });
+            ui.confirmModal.cancelBtn.addEventListener('click', cancelListener, { once: true });
+        }
+
+        function formatTime(totalSeconds) {
+            if (totalSeconds < 0 || isNaN(totalSeconds)) totalSeconds = 0;
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = Math.floor(totalSeconds % 60);
+            const pad = (num) => num.toString().padStart(2, '0');
+            if (hours > 0) return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+            return `${pad(minutes)}:${pad(seconds)}`;
+        }
+        
+        function getCompletionTime(durationSeconds) {
+            if (durationSeconds <= 0 || isNaN(durationSeconds)) return "--:--";
+            const now = new Date();
+            const completionDate = new Date(now.getTime() + durationSeconds * 1000);
+            const hours = completionDate.getHours().toString().padStart(2, '0');
+            const minutes = completionDate.getMinutes().toString().padStart(2, '0');
+            return `${hours}:${minutes}`;
+        }
+
+        function updatePageTitle(timeString) {
+            if (timeString) {
+                document.title = `${timeString} - Time to focus!`;
+            } else {
+                document.title = DEFAULT_TITLE;
+            }
+        }
+
+        // --- Daily Reset Logic ---
+        async function resetAllProgress() {
+            console.log("Performing daily reset...");
+            const updates = localSubjectsCache.map(subject => 
+                updateDoc(doc(db, subjectsCollectionRef.path, subject.id), {
+                    dailyRemainingSeconds: subject.dailyGoalSeconds
+                })
+            );
+
+            const allTaskResetPromises = [];
+            for (const subject of localSubjectsCache) {
+                const tasksPath = `${subjectsCollectionRef.path}/${subject.id}/tasks`;
+                const tasksSnapshot = await getDocs(collection(db, tasksPath));
+                tasksSnapshot.docs.forEach(taskDoc => {
+                    const taskData = taskDoc.data();
+                    const taskDuration = Number(taskData.durationSeconds) || 0;
+                    if (taskData.remainingDurationSeconds !== taskDuration) {
+                        allTaskResetPromises.push(updateDoc(doc(db, tasksPath, taskDoc.id), {
+                            remainingDurationSeconds: taskDuration
+                        }));
+                    }
+                });
+            }
+
+            try {
+                await Promise.all([...updates, ...allTaskResetPromises]);
+                showToast("Tiến độ học tập đã được tự động reset cho ngày mới!");
+                localStorage.setItem('lastResetDate', new Date().toISOString().split('T')[0]);
+            } catch (error) {
+                console.error("Error during daily reset:", error);
+                showToast("Lỗi khi reset tiến độ hàng ngày.");
+            }
+        }
+
+        function checkAndPerformDailyReset() {
+            const lastResetDate = localStorage.getItem('lastResetDate');
+            const todayDate = new Date().toISOString().split('T')[0];
+            if (lastResetDate !== todayDate) {
+                resetAllProgress();
+            }
+        }
+
+        // --- Subject Management ---
+        function renderSubjects() {
+            ui.loadingState.style.display = 'none';
+            ui.subjectList.innerHTML = '';
+            if (localSubjectsCache.length === 0) {
+                ui.emptyState.classList.remove('hidden');
+            } else {
+                ui.emptyState.classList.add('hidden');
+                localSubjectsCache.sort((a, b) => a.name.localeCompare(b.name)).forEach(subject => ui.subjectList.appendChild(createSubjectCard(subject)));
+            }
+            lucide.createIcons();
+        }
+
+        function createSubjectCard(subject) {
+            const card = document.createElement('div');
+            card.className = 'subject-card bg-white rounded-lg shadow-md p-5 flex flex-col border-l-4 border-indigo-500 relative';
+            card.dataset.id = subject.id;
+
+            const totalGoalSeconds = subject.dailyGoalSeconds;
+            const remainingSeconds = subject.dailyRemainingSeconds;
+            const elapsedSeconds = totalGoalSeconds - remainingSeconds;
+            const progressPercent = totalGoalSeconds > 0 ? Math.min(100, (elapsedSeconds / totalGoalSeconds) * 100) : 0;
+            const isCompleted = remainingSeconds <= 0;
+
+            let statusColor = isCompleted ? 'text-emerald-600' : 'text-slate-500';
+            const completionTime = getCompletionTime(remainingSeconds);
+            
+            const isTaskRunning = currentActiveTimer && currentActiveTimer.subjectId === subject.id;
+            const isFocusRunning = currentFocusSession && currentFocusSession.subjectId === subject.id;
+
+            card.innerHTML = `
+                <div class="absolute top-2 right-2 flex items-center gap-1">
+                    <button class="focus-subject-btn p-2 text-slate-400 hover:text-sky-600 transition-colors rounded-full hover:bg-sky-50" title="Chế độ tập trung">
+                        <i data-lucide="crosshair" class="w-5 h-5"></i>
+                    </button>
+                </div>
+                <div class="flex-grow pr-8">
+                    <div class="flex justify-between items-start">
+                        <h3 class="font-bold text-lg mb-2 text-slate-800">${subject.name}</h3>
+                        ${(isTaskRunning || isFocusRunning) ? `<span class="flex items-center text-xs font-semibold text-green-600 bg-green-100 rounded-full px-2 py-0.5">
+                            <i data-lucide="timer" class="w-3.5 h-3.5 mr-1 animate-spin" style="animation-duration: 2s;"></i> Đang chạy
+                        </span>` : ''}
+                    </div>
+                    <p class="text-sm text-slate-500 mb-3">Mục tiêu: ${formatTime(totalGoalSeconds)}</p>
+                    <div class="space-y-1 mb-4">
+                        <div class="font-semibold ${statusColor} text-sm">Còn lại: <span id="subject-remaining-${subject.id}">${formatTime(remainingSeconds)}</span></div>
+                        <div class="text-slate-400 font-normal text-xs">Hoàn thành mục tiêu lúc: <span id="subject-completion-${subject.id}">${completionTime}</span></div>
+                    </div>
+                    <div class="h-2.5 w-full bg-slate-200 rounded-full overflow-hidden">
+                        <div id="subject-progress-${subject.id}" class="progress-bar-inner bg-gradient-to-r ${isCompleted ? 'from-emerald-400 to-green-500' : 'from-sky-400 to-indigo-500'}" style="width: ${progressPercent}%"></div>
+                    </div>
+                </div>
+                <div class="mt-4 pt-4 border-t border-slate-100 flex justify-between items-center">
+                     <button class="view-tasks-btn flex items-center gap-2 text-sm font-semibold text-indigo-600 hover:text-indigo-800 transition-colors py-1 px-3 rounded-md hover:bg-indigo-50">
+                        <i data-lucide="list-checks" class="w-4 h-4"></i>Xem Nhiệm vụ
+                    </button>
+                    <div class="flex justify-end gap-1">
+                        <button class="edit-subject-btn p-2 text-slate-400 hover:text-indigo-600 transition-colors rounded-full hover:bg-indigo-50" title="Chỉnh sửa"><i data-lucide="edit" class="w-4 h-4"></i></button>
+                        <button class="delete-subject-btn p-2 text-slate-400 hover:text-red-600 transition-colors rounded-full hover:bg-red-50" title="Xóa"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    </div>
+                </div>
+            `;
+            card.querySelector('.view-tasks-btn')?.addEventListener('click', e => { e.stopPropagation(); openTaskModal(subject.id, subject.name); });
+            card.querySelector('.edit-subject-btn')?.addEventListener('click', e => { e.stopPropagation(); openSubjectModal(subject); });
+            card.querySelector('.delete-subject-btn')?.addEventListener('click', e => { e.stopPropagation(); showCustomConfirm({ title: 'Xác nhận xóa', message: `Bạn có chắc chắn muốn xóa chủ đề "${subject.name}"? Tất cả nhiệm vụ bên trong cũng sẽ bị xóa.`, okText: "Xóa", onOk: () => deleteSubject(subject.id) }); });
+            card.querySelector('.focus-subject-btn')?.addEventListener('click', e => { e.stopPropagation(); triggerFocusModeForSubject(subject.id); });
+            return card;
+        }
+        
+        function openSubjectModal(subject = null) {
+            ui.subjectForm.reset();
+            if (subject) {
+                ui.modalTitle.textContent = 'Chỉnh Sửa Chủ Đề';
+                ui.subjectIdInput.value = subject.id;
+                ui.subjectNameInput.value = subject.name;
+                ui.dailyGoalHoursInput.value = Math.floor(subject.dailyGoalSeconds / 3600);
+                ui.dailyGoalMinutesInput.value = (subject.dailyGoalSeconds % 3600) / 60;
+            } else {
+                ui.modalTitle.textContent = 'Thêm Chủ Đề Mới';
+                ui.subjectIdInput.value = '';
+            }
+            ui.subjectModal.classList.remove('hidden');
+            setTimeout(() => {
+                ui.subjectModal.classList.remove('opacity-0');
+                ui.modalContent.classList.remove('scale-95', 'opacity-0');
+            }, 10);
+        }
+
+        function closeSubjectModal() {
+            ui.subjectModal.classList.add('opacity-0');
+            ui.modalContent.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => ui.subjectModal.classList.add('hidden'), 300);
+        }
+
+        async function saveSubject(e) {
+            e.preventDefault();
+            const id = ui.subjectIdInput.value;
+            const name = ui.subjectNameInput.value.trim();
+            const dailyGoalHours = parseInt(ui.dailyGoalHoursInput.value) || 0;
+            const dailyGoalMinutes = parseInt(ui.dailyGoalMinutesInput.value) || 0;
+            const dailyGoalSeconds = (dailyGoalHours * 3600) + (dailyGoalMinutes * 60);
+
+            if (!name || dailyGoalSeconds <= 0) return showToast("Vui lòng điền đầy đủ thông tin hợp lệ.");
+
+            try {
+                if (id) {
+                    const subjectDocRef = doc(db, subjectsCollectionRef.path, id);
+                    await updateDoc(subjectDocRef, { name, dailyGoalSeconds });
+                    showToast('Cập nhật chủ đề thành công!');
+                } else {
+                    await addDoc(subjectsCollectionRef, { 
+                        name, 
+                        dailyGoalSeconds, 
+                        dailyRemainingSeconds: dailyGoalSeconds,
+                        ownerId: userId,
+                    });
+                    showToast('Thêm chủ đề mới thành công!');
+                }
+                closeSubjectModal();
+            } catch (error) { 
+                console.error("Error saving subject: ", error); 
+                showToast(`Lỗi: ${error.message}`); 
+            }
+        }
+
+        async function deleteSubject(id) {
+            try {
+                if (currentFocusSession && currentFocusSession.subjectId === id) {
+                    await completeFocusSession(false); 
+                }
+                if (currentActiveTimer && currentActiveTimer.subjectId === id) {
+                    await pauseTimer(false);
+                }
+
+                const tasksPath = `${subjectsCollectionRef.path}/${id}/tasks`;
+                const tasksSnapshot = await getDocs(collection(db, tasksPath));
+                const deletePromises = tasksSnapshot.docs.map(taskDoc => deleteDoc(taskDoc.ref));
+                await Promise.all(deletePromises);
+                
+                await deleteDoc(doc(db, subjectsCollectionRef.path, id));
+                showToast('Đã xóa chủ đề và các nhiệm vụ liên quan.');
+                
+            } catch (error) { 
+                console.error("Error deleting subject: ", error); 
+                showToast(`Lỗi khi xóa: ${error.message}`); 
+            }
+        }
+        
+        // --- Task Management ---
+        function openTaskModal(subjectId, subjectName) {
+            ui.taskModal.subjectName.textContent = `Chủ đề: ${subjectName}`;
+            ui.taskModal.currentSubjectIdInput.value = subjectId;
+            
+            ui.taskModal.backdrop.classList.remove('hidden');
+            setTimeout(() => {
+                ui.taskModal.backdrop.classList.remove('opacity-0');
+                ui.taskModal.content.classList.remove('scale-95', 'opacity-0');
+            }, 10);
+            
+            const tasksPath = `${subjectsCollectionRef.path}/${subjectId}/tasks`;
+            const tasksCollectionRef = collection(db, tasksPath);
+            
+            if (unsubscribeTasks) unsubscribeTasks();
+            unsubscribeTasks = onSnapshot(query(tasksCollectionRef), (snapshot) => {
+                localTasksCache[subjectId] = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderTasks(subjectId);
+            }, (error) => {
+                console.error("Task snapshot error:", error);
+                ui.taskModal.listContainer.innerHTML = `<p class="text-red-500">Lỗi tải nhiệm vụ.</p>`;
+            });
+        }
+
+        function closeTaskModal() {
+            ui.taskModal.backdrop.classList.add('opacity-0');
+            ui.taskModal.content.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                ui.taskModal.backdrop.classList.add('hidden');
+                if (unsubscribeTasks) unsubscribeTasks();
+                resetTaskForm();
+            }, 300);
+        }
+        
+        function renderTasks(subjectId) {
+            ui.taskModal.listContainer.innerHTML = '';
+            const tasks = localTasksCache[subjectId] || [];
+            if (tasks.length === 0) {
+                ui.taskModal.emptyState.classList.remove('hidden');
+            } else {
+                ui.taskModal.emptyState.classList.add('hidden');
+                tasks.sort((a, b) => a.name.localeCompare(b.name)).forEach(task => {
+                    const taskEl = createTaskElement(task, subjectId);
+                    ui.taskModal.listContainer.appendChild(taskEl);
+                });
+            }
+            lucide.createIcons();
+        }
+
+        function createTaskElement(task, subjectId) {
+            const el = document.createElement('div');
+            el.className = 'p-4 bg-slate-50 rounded-lg mb-3 flex flex-wrap items-center justify-between gap-4 border-l-4 border-slate-300';
+            
+            const isTimerActiveForThisTask = currentActiveTimer && currentActiveTimer.taskId === task.id;
+            const isTaskCompleted = task.remainingDurationSeconds !== undefined && task.remainingDurationSeconds <= 0;
+            const completionTime = getCompletionTime(task.durationSeconds);
+            const remainingTime = isTimerActiveForThisTask ? Math.max(0, Math.floor((currentActiveTimer.targetEndTime - Date.now()) / 1000)) : 0;
+
+            el.innerHTML = `
+                <div class="flex-grow">
+                    <p class="font-semibold text-slate-700">${task.name}</p>
+                    <div class="flex items-baseline gap-x-3">
+                        <p class="text-sm text-slate-500">Thời gian: ${formatTime(task.durationSeconds)}</p>
+                        <p class="text-xs text-slate-400">(Hoàn thành lúc: ${completionTime})</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 flex-shrink-0">
+                    <span id="task-timer-${task.id}" class="text-base font-mono font-semibold text-indigo-600 w-24 text-center">
+                        ${isTimerActiveForThisTask ? formatTime(remainingTime) : ''}
+                    </span>
+                    
+                    ${isTimerActiveForThisTask ? `
+                        <button class="pause-task-btn p-2 text-white bg-amber-500 rounded-full hover:bg-amber-600 transition" title="Tạm dừng">
+                            <i data-lucide="pause" class="w-5 h-5"></i>
+                        </button>
+                        <button class="complete-early-btn p-2 text-white bg-teal-500 rounded-full hover:bg-teal-600 transition" title="Hoàn thành sớm">
+                            <i data-lucide="check-circle" class="w-5 h-5"></i>
+                        </button>
+                    ` : isTaskCompleted ? `
+                        <span class="flex items-center gap-2 text-emerald-600 font-semibold text-sm px-3 h-[40px]">
+                            <i data-lucide="check-circle-2" class="w-5 h-5"></i>
+                            Hoàn thành
+                        </span>
+                    ` : `
+                        <button class="start-task-btn p-2 text-white bg-green-500 rounded-full hover:bg-green-600 transition" title="Bắt đầu">
+                            <i data-lucide="play" class="w-5 h-5"></i>
+                        </button>
+                    `}
+
+                    <button class="edit-task-btn p-2 text-slate-400 hover:text-indigo-600 transition-colors rounded-full hover:bg-indigo-50" title="Sửa"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                    <button class="delete-task-btn p-2 text-slate-400 hover:text-red-600 transition-colors rounded-full hover:bg-red-50" title="Xóa"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                </div>
+            `;
+
+            el.querySelector('.start-task-btn')?.addEventListener('click', () => startTimer(subjectId, task.id));
+            el.querySelector('.pause-task-btn')?.addEventListener('click', () => pauseTimer());
+            el.querySelector('.complete-early-btn')?.addEventListener('click', () => completeTaskEarly(subjectId, task.id));
+            el.querySelector('.edit-task-btn')?.addEventListener('click', () => editTask(task));
+            el.querySelector('.delete-task-btn')?.addEventListener('click', () => showCustomConfirm({
+                title: 'Xóa Nhiệm vụ?',
+                message: `Bạn có chắc muốn xóa nhiệm vụ "${task.name}"?`,
+                okText: 'Xóa',
+                onOk: () => deleteTask(subjectId, task.id)
+            }));
+            return el;
+        }
+        
+        function resetTaskForm() {
+            ui.taskModal.form.reset();
+            ui.taskModal.taskIdInput.value = '';
+            ui.taskModal.saveBtnText.textContent = 'Thêm Nhiệm vụ';
+            ui.taskModal.cancelEditBtn.classList.add('hidden');
+        }
+
+        async function saveTask(e) {
+            e.preventDefault();
+            const subjectId = ui.taskModal.currentSubjectIdInput.value;
+            const taskId = ui.taskModal.taskIdInput.value;
+            const name = ui.taskModal.taskNameInput.value.trim();
+            const durationMinutes = parseInt(ui.taskModal.taskDurationInput.value);
+
+            if (!subjectId || !name || isNaN(durationMinutes) || durationMinutes <= 0) {
+                return showToast("Vui lòng nhập thông tin nhiệm vụ hợp lệ.");
+            }
+            
+            const durationSeconds = durationMinutes * 60;
+            const tasksPath = `${subjectsCollectionRef.path}/${subjectId}/tasks`;
+            const tasksCollectionRef = collection(db, tasksPath);
+
+            try {
+                if (taskId) { // Editing existing task
+                    const currentTask = localTasksCache[subjectId]?.find(t => t.id === taskId);
+                    let newRemainingDurationSeconds = durationSeconds;
+                    if (currentTask && currentTask.durationSeconds === durationSeconds) {
+                        newRemainingDurationSeconds = currentTask.remainingDurationSeconds;
+                    }
+                    await updateDoc(doc(tasksCollectionRef, taskId), { 
+                        name, 
+                        durationSeconds,
+                        remainingDurationSeconds: newRemainingDurationSeconds
+                    });
+                    showToast("Cập nhật nhiệm vụ thành công!");
+                } else { // Adding new task
+                    await addDoc(tasksCollectionRef, { 
+                        name, 
+                        durationSeconds,
+                        remainingDurationSeconds: durationSeconds
+                    });
+                    showToast("Thêm nhiệm vụ mới thành công!");
+                }
+                resetTaskForm();
+            } catch (error) {
+                console.error("Error saving task:", error);
+                showToast(`Lỗi: ${error.message}`);
+            }
+        }
+        
+        function editTask(task) {
+            ui.taskModal.taskIdInput.value = task.id;
+            ui.taskModal.taskNameInput.value = task.name;
+            ui.taskModal.taskDurationInput.value = task.durationSeconds / 60;
+            ui.taskModal.saveBtnText.textContent = 'Lưu thay đổi';
+            ui.taskModal.cancelEditBtn.classList.remove('hidden');
+            ui.taskModal.taskNameInput.focus();
+        }
+        
+        async function deleteTask(subjectId, taskId) {
+            if (currentActiveTimer && currentActiveTimer.taskId === taskId) {
+                await pauseTimer(false);
+            }
+            const taskDocRef = doc(db, `${subjectsCollectionRef.path}/${subjectId}/tasks`, taskId);
+            try {
+                await deleteDoc(taskDocRef);
+                showToast("Đã xóa nhiệm vụ.");
+            } catch (error) {
+                console.error("Error deleting task:", error);
+                showToast(`Lỗi khi xóa nhiệm vụ: ${error.message}`);
+            }
+        }
+
+        // --- Task Timer Functionality (from Modal) ---
+        function startTimer(subjectId, taskId) {
+            if (currentActiveTimer) {
+                showToast("Một nhiệm vụ khác đang chạy. Vui lòng tạm dừng hoặc hoàn thành trước.");
+                return;
+            }
+            if (currentFocusSession) {
+                showToast("Chế độ tập trung đang chạy. Vui lòng thoát trước.");
+                return;
+            }
+
+            const subject = localSubjectsCache.find(s => s.id === subjectId);
+            const task = localTasksCache[subjectId]?.find(t => t.id === taskId);
+
+            if (!subject || !task) return showToast("Không tìm thấy nhiệm vụ hoặc chủ đề.");
+            if (subject.dailyRemainingSeconds <= 0) return showToast("Chủ đề này đã hoàn thành mục tiêu hôm nay!");
+
+            const durationForSession = (task.remainingDurationSeconds !== undefined && task.remainingDurationSeconds > 0)
+                ? task.remainingDurationSeconds
+                : task.durationSeconds;
+
+            if (durationForSession <= 0) {
+                showToast("Nhiệm vụ này đã hoàn thành!");
+                return;
+            }
+
+            const targetEndTime = Date.now() + durationForSession * 1000;
+
+            const intervalId = setInterval(() => {
+                const now = Date.now();
+                const remainingTaskTime = Math.max(0, Math.floor((targetEndTime - now) / 1000));
+                
+                const subjectToUpdate = localSubjectsCache.find(s => s.id === subjectId);
+                if(subjectToUpdate) {
+                    subjectToUpdate.dailyRemainingSeconds = Math.max(0, subjectToUpdate.dailyRemainingSeconds - 1);
+                    updateTaskAndSubjectUI(subjectId, subjectToUpdate.dailyRemainingSeconds, subjectToUpdate.dailyGoalSeconds, taskId, remainingTaskTime);
+                }
+                
+                if (remainingTaskTime <= 0 || (subjectToUpdate && subjectToUpdate.dailyRemainingSeconds <= 0)) {
+                    const taskToFinish = localTasksCache[subjectId].find(t => t.id === taskId);
+                    const reason = remainingTaskTime <= 0 ? `nhiệm vụ "${taskToFinish.name}"` : `mục tiêu chủ đề "${subject.name}"`;
+                    showToast(`Hoàn thành ${reason}!`);
+                    
+                    const taskTimerEl = document.getElementById(`task-timer-${taskId}`);
+                    if(taskTimerEl) taskTimerEl.textContent = '';
+
+                    pauseTimer(true, 0); // Pause, save progress, and set task remaining time to 0
+                    if (subjectToUpdate && subjectToUpdate.dailyRemainingSeconds <= 0) {
+                        showToast(`Chúc mừng! Bạn đã hoàn thành mục tiêu cho chủ đề "${subject.name}" hôm nay.`);
+                    }
+                }
+            }, 1000);
+
+            currentActiveTimer = { subjectId, taskId, intervalId, targetEndTime };
+            renderSubjects();
+            renderTasks(subjectId);
+        }
+
+        async function pauseTimer(shouldUpdateDb = true, explicitRemainingTime = null) {
+            if (!currentActiveTimer) return;
+
+            clearInterval(currentActiveTimer.intervalId);
+            const { subjectId, taskId, targetEndTime } = currentActiveTimer;
+            currentActiveTimer = null;
+
+            if (shouldUpdateDb) {
+                const remainingTime = (explicitRemainingTime !== null) 
+                    ? explicitRemainingTime 
+                    : Math.max(0, Math.floor((targetEndTime - Date.now()) / 1000));
+
+                const subject = localSubjectsCache.find(s => s.id === subjectId);
+                const taskDocRef = doc(db, `${subjectsCollectionRef.path}/${subjectId}/tasks`, taskId);
+
+                try {
+                    await updateDoc(doc(db, subjectsCollectionRef.path, subjectId), {
+                        dailyRemainingSeconds: subject.dailyRemainingSeconds
+                    });
+                    await updateDoc(taskDocRef, {
+                        remainingDurationSeconds: remainingTime
+                    });
+
+                    if (explicitRemainingTime === null) {
+                       showToast("Đồng hồ đã tạm dừng. Tiến độ đã được lưu.");
+                    }
+                } catch (error) {
+                    console.error("Error saving progress on pause:", error);
+                    showToast("Lỗi khi lưu tiến độ.");
+                }
+            }
+            
+            renderSubjects();
+            renderTasks(subjectId);
+        }
+
+        async function completeTaskEarly(subjectId, taskId) {
+            if (!currentActiveTimer || currentActiveTimer.taskId !== taskId) {
+                showToast("Đồng hồ cho nhiệm vụ này không hoạt động.");
+                return;
+            }
+
+            clearInterval(currentActiveTimer.intervalId);
+            const session = { ...currentActiveTimer };
+            currentActiveTimer = null;
+
+            const remainingTaskTime = Math.max(0, Math.floor((session.targetEndTime - Date.now()) / 1000));
+            const subject = localSubjectsCache.find(s => s.id === subjectId);
+            if (!subject) return;
+            
+            const newSubjectRemainingSeconds = Math.max(0, subject.dailyRemainingSeconds - remainingTaskTime);
+            const taskDocRef = doc(db, `${subjectsCollectionRef.path}/${subjectId}/tasks`, taskId);
+
+            try {
+                await updateDoc(doc(db, subjectsCollectionRef.path, subjectId), {
+                    dailyRemainingSeconds: newSubjectRemainingSeconds
+                });
+                await updateDoc(taskDocRef, {
+                    remainingDurationSeconds: 0
+                });
+
+                showToast("Nhiệm vụ đã hoàn thành sớm. Tiến độ đã được cập nhật.");
+                
+                if (newSubjectRemainingSeconds <= 0 && subject.dailyRemainingSeconds > 0) {
+                     showToast(`Chúc mừng! Bạn đã hoàn thành mục tiêu cho chủ đề "${subject.name}" hôm nay.`);
+                }
+            } catch (error) {
+                console.error("Error updating progress on early completion:", error);
+                showToast("Lỗi khi cập nhật tiến độ.");
+            } finally {
+                renderSubjects();
+                renderTasks(subjectId);
+            }
+        }
+
+        function updateTaskAndSubjectUI(subjectId, remainingSubjectTime, totalSubjectGoal, taskId = null, remainingTaskTime = 0) {
+            const subjectRemainingEl = document.getElementById(`subject-remaining-${subjectId}`);
+            if (subjectRemainingEl) subjectRemainingEl.textContent = formatTime(remainingSubjectTime);
+            
+            const subjectCompletionEl = document.getElementById(`subject-completion-${subjectId}`);
+            if (subjectCompletionEl) subjectCompletionEl.textContent = getCompletionTime(remainingSubjectTime);
+            
+            const subjectProgressEl = document.getElementById(`subject-progress-${subjectId}`);
+            if (subjectProgressEl) {
+                const elapsedSeconds = totalSubjectGoal - remainingSubjectTime;
+                const progressPercent = totalSubjectGoal > 0 ? (elapsedSeconds / totalSubjectGoal) * 100 : 0;
+                subjectProgressEl.style.width = `${progressPercent}%`;
+                if (remainingSubjectTime <= 0) {
+                    subjectProgressEl.classList.remove('from-sky-400', 'to-indigo-500');
+                    subjectProgressEl.classList.add('from-emerald-400', 'to-green-500');
+                }
+            }
+            if (taskId) {
+                const taskTimerEl = document.getElementById(`task-timer-${taskId}`);
+                if (taskTimerEl) {
+                    taskTimerEl.textContent = formatTime(remainingTaskTime);
+                }
+            }
+        }
+
+
+        // --- Timer & Focus Mode Functionality ---
+        function startFocusSession({ subjectId, taskId, taskName, durationSeconds }) {
+            if (currentActiveTimer) {
+                showToast("Một nhiệm vụ đang được tính giờ. Vui lòng tạm dừng trước.");
+                return;
+            }
+            if (currentFocusSession) {
+                showToast("Một phiên khác đang chạy.");
+                return;
+            }
+            
+            let initialRemainingTime = durationSeconds;
+            if (subjectId) {
+                const subject = localSubjectsCache.find(s => s.id === subjectId);
+                if (subject && !taskId) { // Only use subject's remaining time if it's a subject-level focus
+                    initialRemainingTime = subject.dailyRemainingSeconds;
+                }
+            }
+
+            currentFocusSession = {
+                subjectId,
+                taskId,
+                taskName,
+                totalDuration: initialRemainingTime,
+                remainingSeconds: initialRemainingTime,
+                startTime: Date.now(),
+                isPaused: false,
+                intervalId: null,
+            };
+            
+            openFocusModeUI();
+            runFocusTimer();
+        }
+
+        function runFocusTimer() {
+            clearInterval(currentFocusSession.intervalId);
+            
+            currentFocusSession.intervalId = setInterval(() => {
+                if (currentFocusSession.isPaused) return;
+                currentFocusSession.remainingSeconds--;
+                updateFocusTimerUI();
+                
+                if (!isMuted && ui.sound.soundSelect.value === 'tick-tock') {
+                    ui.sound.tickTock.currentTime = 0;
+                    ui.sound.tickTock.play().catch(e => {});
+                }
+
+                if (currentFocusSession.remainingSeconds <= 0) {
+                    completeFocusSession(true, true);
+                }
+            }, 1000);
+        }
+
+        function togglePauseResumeFocus() {
+            if (!currentFocusSession) return;
+            currentFocusSession.isPaused = !currentFocusSession.isPaused;
+            updateFocusPauseButtonUI();
+        }
+
+        async function completeFocusSession(saveProgress = true, wasAutomatic = false) {
+            if (!currentFocusSession) return;
+
+            clearInterval(currentFocusSession.intervalId);
+            const session = { ...currentFocusSession };
+            currentFocusSession = null;
+            
+            closeFocusModeUI();
+            stopAllAudio();
+            updatePageTitle(null);
+
+            if (saveProgress && session.subjectId) {
+                const timeSpent = session.totalDuration - session.remainingSeconds;
+
+                if (timeSpent > 0) {
+                    const subject = localSubjectsCache.find(s => s.id === session.subjectId);
+                    if (subject) {
+                        let newSubjectRemaining = Math.max(0, subject.dailyRemainingSeconds - timeSpent);
+                        try {
+                            await updateDoc(doc(db, subjectsCollectionRef.path, session.subjectId), {
+                                dailyRemainingSeconds: newSubjectRemaining
+                            });
+                            showToast(wasAutomatic ? `Hoàn thành "${session.taskName}"!` : "Lưu tiến độ thành công!");
+                            if (newSubjectRemaining <= 0) {
+                                 showToast(`Chúc mừng! Bạn đã hoàn thành mục tiêu cho chủ đề "${subject.name}" hôm nay.`);
+                            }
+                        } catch (error) {
+                            console.error("Error updating progress:", error);
+                            showToast("Lỗi khi lưu tiến độ.");
+                        }
+                    }
+                }
+            }
+            renderSubjects();
+        }
+
+        function openFocusModeUI() {
+            const session = currentFocusSession;
+            ui.focusMode.taskName.textContent = session.taskName || "Phiên tập trung";
+            ui.focusMode.timerDisplay.textContent = formatTime(session.remainingSeconds);
+            ui.focusMode.overlay.classList.remove('hidden');
+            ui.focusMode.overlay.classList.add('flex');
+            updateFocusPauseButtonUI();
+            
+            if (!isMuted && currentAmbientSound) {
+                currentAmbientSound.play();
+            }
+        }
+
+        function closeFocusModeUI() {
+            ui.focusMode.overlay.classList.add('hidden');
+            ui.focusMode.overlay.classList.remove('flex');
+        }
+        
+        function updateFocusPauseButtonUI() {
+            if (!currentFocusSession) return;
+            const icon = ui.focusMode.pauseResumeIcon;
+            if (currentFocusSession.isPaused) {
+                icon.setAttribute('data-lucide', 'play');
+            } else {
+                icon.setAttribute('data-lucide', 'pause');
+            }
+            lucide.createIcons({ nodes: [icon] });
+        }
+        
+        function updateFocusTimerUI() {
+            if (!currentFocusSession) return;
+            
+            const remaining = currentFocusSession.remainingSeconds;
+            const formattedTime = formatTime(remaining);
+
+            ui.focusMode.timerDisplay.textContent = formattedTime;
+            updatePageTitle(formattedTime);
+
+            if (currentFocusSession.subjectId) {
+                const subject = localSubjectsCache.find(s => s.id === currentFocusSession.subjectId);
+                if (subject) {
+                    const timeSpentInCurrentSession = currentFocusSession.totalDuration - remaining;
+                    const currentSubjectRemainingForDisplay = Math.max(0, subject.dailyRemainingSeconds - timeSpentInCurrentSession);
+                    updateTaskAndSubjectUI(subject.id, currentSubjectRemainingForDisplay, subject.dailyGoalSeconds);
+                }
+            }
+        }
+        
+        async function triggerFocusModeForSubject(subjectId) {
+            if (currentActiveTimer) {
+                showToast("Một nhiệm vụ đang được tính giờ. Vui lòng tạm dừng trước.");
+                return;
+            }
+            const subject = localSubjectsCache.find(s => s.id === subjectId);
+            if (!subject) return showToast("Không tìm thấy chủ đề.");
+            if (subject.dailyRemainingSeconds <= 0) return showToast("Mục tiêu của chủ đề này đã hoàn thành!");
+
+            startFocusSession({
+                subjectId: subjectId,
+                taskId: null,
+                taskName: `Tập trung vào: ${subject.name}`,
+                durationSeconds: subject.dailyRemainingSeconds,
+            });
+        }
+
+        // --- Sound Control ---
+        function setupSoundControls() {
+            ui.sound.muteBtn.addEventListener('click', toggleMute);
+            ui.sound.soundSelect.addEventListener('change', (e) => playAmbientSound(e.target.value));
+        }
+
+        function toggleMute() {
+            isMuted = !isMuted;
+            const icon = ui.sound.muteIcon;
+            if (isMuted) {
+                icon.setAttribute('data-lucide', 'volume-x');
+                stopAllAudio();
+            } else {
+                icon.setAttribute('data-lucide', 'volume-2');
+                playAmbientSound(ui.sound.soundSelect.value);
+            }
+            lucide.createIcons({ nodes: [icon] });
+        }
+
+        function playAmbientSound(sound) {
+            stopAllAudio();
+            if (isMuted || !sound) return;
+
+            switch(sound) {
+                case 'rain': currentAmbientSound = ui.sound.rain; break;
+                case 'waves': currentAmbientSound = ui.sound.waves; break;
+                case 'lofi': currentAmbientSound = ui.sound.lofi; break;
+                default: currentAmbientSound = null;
+            }
+            
+            if (currentAmbientSound) {
+                currentAmbientSound.play().catch(e => console.error("Audio play failed:", e));
+            }
+        }
+
+        function stopAllAudio() {
+            ui.sound.rain.pause();
+            ui.sound.waves.pause();
+            ui.sound.lofi.pause();
+            ui.sound.tickTock.pause();
+            currentAmbientSound = null;
+        }
+
+        // --- Event Listeners and Firebase Setup ---
+        function setupEventListeners() {
+            ui.loginBtn.addEventListener('click', signInWithGoogle);
+            ui.logoutBtn.addEventListener('click', signOutUser);
+            ui.addSubjectBtn.addEventListener('click', () => openSubjectModal());
+            ui.startPomodoroBtn.addEventListener('click', () => {
+                startFocusSession({
+                    subjectId: null,
+                    taskId: 'pomodoro',
+                    taskName: 'Pomodoro',
+                    durationSeconds: 25 * 60,
+                });
+            });
+            ui.cancelSubjectBtn.addEventListener('click', closeSubjectModal);
+            ui.subjectModal.addEventListener('click', e => e.target === ui.subjectModal && closeSubjectModal());
+            ui.subjectForm.addEventListener('submit', saveSubject);
+
+            // Task Modal Listeners
+            ui.taskModal.closeBtn.addEventListener('click', closeTaskModal);
+            ui.taskModal.backdrop.addEventListener('click', e => e.target === ui.taskModal.backdrop && closeTaskModal());
+            ui.taskModal.form.addEventListener('submit', saveTask);
+            ui.taskModal.cancelEditBtn.addEventListener('click', resetTaskForm);
+            
+            // Focus Mode Listeners
+            ui.focusMode.closeBtn.addEventListener('click', () => completeFocusSession(true));
+            ui.focusMode.pauseResumeBtn.addEventListener('click', togglePauseResumeFocus);
+            ui.focusMode.completeBtn.addEventListener('click', () => completeFocusSession(true));
+
+            // Sound Listeners
+            setupSoundControls();
+        }
+
+        async function signInWithGoogle() {
+            const provider = new GoogleAuthProvider();
+            try {
+                await setPersistence(auth, browserLocalPersistence);
+                await signInWithPopup(auth, provider);
+            } catch (error) {
+                console.error("Lỗi khi đăng nhập với Google:", error);
+                showToast("Đăng nhập thất bại. Vui lòng thử lại.");
+            }
+        }
+
+        async function signOutUser() {
+            try {
+                if(currentFocusSession) await completeFocusSession(true);
+                if(currentActiveTimer) await pauseTimer(true);
+                await signOut(auth);
+            } catch (error) {
+                console.error("Lỗi khi đăng xuất:", error);
+                showToast("Đăng xuất thất bại.");
+            }
+        }
+
+        async function main() {
+            if (!firebaseConfig.apiKey || firebaseConfig.apiKey.startsWith("YOUR_API_KEY")) {
+                document.body.innerHTML = '<div class="text-center p-8 text-red-500 font-bold">Lỗi: Vui lòng cung cấp thông tin cấu hình Firebase hợp lệ.</div>';
+                return;
+            }
+            try {
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                await setPersistence(auth, browserLocalPersistence);
+            } catch (e) {
+                console.error("Firebase initialization failed:", e);
+                document.body.innerHTML = '<div class="text-center p-8 text-red-500 font-bold">Không thể kết nối tới cơ sở dữ liệu.</div>';
+                return;
+            }
+
+            setupEventListeners();
+            lucide.createIcons();
+
+            onAuthStateChanged(auth, user => {
+                if (user) {
+                    ui.loginContainer.classList.add('hidden');
+                    ui.appContainer.classList.remove('hidden');
+                    userId = user.uid;
+                    ui.userInfo.name.textContent = user.displayName;
+                    ui.userInfo.email.textContent = user.email;
+                    ui.userInfo.avatar.src = user.photoURL || `https://ui-avatars.com/api/?name=${user.displayName}&background=random`;
+                    
+                    const userSubjectsPath = `artifacts/${appId}/users/${userId}/subjects`;
+                    subjectsCollectionRef = collection(db, userSubjectsPath);
+                    
+                    if (unsubscribeSubjects) unsubscribeSubjects();
+                    
+                    unsubscribeSubjects = onSnapshot(query(subjectsCollectionRef), (snapshot) => {
+                        localSubjectsCache = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                        checkAndPerformDailyReset();
+                        renderSubjects();
+                    }, (error) => {
+                        console.error("Firestore snapshot error:", error);
+                        ui.loadingState.innerText = "Lỗi khi tải dữ liệu.";
+                    });
+
+                } else {
+                    ui.appContainer.classList.add('hidden');
+                    ui.loginContainer.classList.remove('hidden');
+                    if (unsubscribeSubjects) unsubscribeSubjects();
+                    if (unsubscribeTasks) unsubscribeTasks();
+                    localSubjectsCache = [];
+                    localTasksCache = {};
+                    ui.subjectList.innerHTML = '';
+                    ui.emptyState.classList.add('hidden');
+                    ui.loadingState.style.display = 'block';
+                    if (currentFocusSession) completeFocusSession(false);
+                    if (currentActiveTimer) pauseTimer(false);
+                }
+            });
+        }
+
+        main();
+    </script>
+    
+</body>
+</html>
